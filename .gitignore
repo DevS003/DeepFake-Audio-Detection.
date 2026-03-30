@@ -1,0 +1,18 @@
+# Ignore your data folders
+clean_data/
+features/
+raw_data/
+venv/
+
+# Ignore Python caches and environment files
+__pycache__/
+*.pyc
+.env
+
+# Ignore Jupyter Notebook checkpoints (if you use them)
+.ipynb_checkpoints/
+
+# Ignore saved model weights (if they are large)
+*.pt
+*.h5
+*.pkl
