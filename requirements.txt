@@ -1,0 +1,7 @@
+flask==3.1.1
+gunicorn==23.0.0
+numpy==1.26.4
+librosa==0.10.2
+soundfile==0.13.1
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.7.0+cpu

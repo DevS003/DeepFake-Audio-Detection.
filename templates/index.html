@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Deepfake Audio Detector</title>
+  <meta name="description" content="Upload an audio file and detect whether it is human speech or AI-generated deepfake audio using machine learning.">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- External CSS (Flask static) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Tailwind Dark Mode Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white transition-all duration-300">
+
+  <!-- ================= NAVBAR ================= -->
+  <nav class="fixed top-0 left-0 w-full bg-white dark:bg-gray-800 shadow-md z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <!-- Logo -->
+      <h1 class="text-2xl font-bold text-blue-600">
+        TrueForm
+      </h1>
+
+      <!-- Nav Links -->
+      <ul class="hidden md:flex space-x-8 font-medium">
+        <li><a href="#home" class="hover:text-blue-500">Home</a></li>
+        <li><a href="#detect" class="hover:text-blue-500">Detect</a></li>
+        <li><a href="#about" class="hover:text-blue-500">About</a></li>
+        <li><a href="#contact" class="hover:text-blue-500">Contact</a></li>
+      </ul>
+
+      <!-- Theme Toggle -->
+      <button id="themeToggle"
+        class="bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-lg">
+        🌙
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section id="home"
+    class="min-h-screen flex flex-col justify-center items-center text-center px-6">
+
+    <h2 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+      Deepfake Audio Detection
+    </h2>
+
+    <p class="max-w-2xl text-lg text-gray-600 dark:text-gray-300 mb-8">
+      Upload an audio file and let the machine learning
+      model determine whether the voice is human or AI generated.
+    </p>
+
+    <a href="#detect"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl transition">
+      Start Detection
+    </a>
+  </section>
+
+  <!-- ================= DETECTION SECTION ================= -->
+  <section id="detect"
+    class="py-24 px-6 bg-white dark:bg-gray-800">
+
+    <div class="max-w-4xl mx-auto">
+
+      <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold mb-4">
+          Upload Audio File
+        </h2>
+
+        <p class="text-gray-600 dark:text-gray-300">
+          Supported Formats: .flac, .wav, .mp3, .ogg
+        </p>
+      </div>
+
+      <!-- Upload Card -->
+      <div
+        class="bg-gray-100 dark:bg-gray-900 p-10 rounded-2xl shadow-lg">
+
+        <!-- Drag Drop Area -->
+        <div id="dropArea"
+          class="border-2 border-dashed border-blue-400 rounded-xl p-12 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition">
+
+          <input type="file"
+            id="audioInput"
+            accept=".flac,.wav,.mp3,.ogg,.webm,.m4a"
+            class="hidden">
+
+          <p class="text-xl font-medium mb-3">
+            Drag & Drop your audio file here
+          </p>
+
+          <p class="text-gray-500 mb-5">
+            or click to browse files
+          </p>
+
+          <button
+            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            Select File
+          </button>
+        </div>
+
+        <!-- File Name -->
+        <div id="fileName"
+          class="mt-6 text-center text-green-600 font-medium">
+        </div>
+
+        <!-- Audio Preview -->
+        <div class="mt-6">
+          <audio id="audioPlayer"
+            controls
+            class="w-full hidden">
+          </audio>
+        </div>
+
+        <div id="waveform"
+          class="mt-8">
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="mt-8 flex gap-4 justify-center">
+
+          <button id="startRecord"
+            class="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition">
+            Start Recording
+          </button>
+
+          <button id="stopRecord"
+            class="bg-gray-700 text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition">
+            Stop Recording
+          </button>
+
+        </div>
+
+        <p id="recordingStatus"
+          class="text-center mt-4 text-red-500 font-medium">
+        </p>
+
+        <!-- Analyze Button -->
+        <div class="text-center mt-8">
+          <button id="analyzeBtn"
+            class="bg-black dark:bg-blue-600 text-white px-8 py-3 rounded-xl hover:opacity-90 transition">
+            Analyze Audio
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading"
+          class="hidden mt-8 flex justify-center">
+          <div class="loader"></div>
+        </div>
+
+        <!-- Result -->
+        <div id="resultBox"
+          class="hidden mt-10 p-6 rounded-xl text-center">
+          <h3 class="text-2xl font-bold mb-2">
+            Prediction Result
+          </h3>
+          <p id="confidenceText"
+            class="mt-3 text-lg">
+          </p>
+
+          <p id="resultText"
+            class="text-xl font-semibold">
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT SECTION ================= -->
+  <section id="about"
+    class="py-24 px-6">
+
+    <div class="max-w-5xl mx-auto text-center">
+
+      <h2 class="text-4xl font-bold mb-8">
+        About The Project
+      </h2>
+
+      <p class="text-lg leading-8 text-gray-600 dark:text-gray-300">
+        This project uses machine learning techniques to identify
+        whether an uploaded audio sample is generated by AI or spoken
+        naturally by a human. The model analyzes patterns, frequency
+        distributions, and acoustic features extracted from audio files.
+      </p>
+
+    </div>
+  </section>
+
+  <!-- ================= CONTACT SECTION ================= -->
+  <footer id="contact"
+    class="bg-gray-200 dark:bg-gray-800 py-10">
+
+    <div class="max-w-6xl mx-auto px-6 text-center">
+
+      <h2 class="text-3xl font-bold mb-4">
+        Contact
+      </h2>
+
+      <p class="mb-2">
+        Email: yourmail@example.com
+      </p>
+
+      <p class="mb-6">
+        Chitkara University, Punjab
+      </p>
+
+      <div class="flex justify-center space-x-6">
+        <a href="#" class="hover:text-blue-500">LinkedIn</a>
+        <a href="#" class="hover:text-blue-500">GitHub</a>
+        <a href="#" class="hover:text-blue-500">Portfolio</a>
+      </div>
+
+      <p class="mt-8 text-sm text-gray-500">
+        © 2026 Deepfake Audio Detection Project
+      </p>
+
+    </div>
+  </footer>
+
+  <!-- External JS -->
+   <script src="https://unpkg.com/wavesurfer.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
