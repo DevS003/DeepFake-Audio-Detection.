@@ -1,166 +1,176 @@
-// ================= ELEMENT SELECTION =================
+// ══════════════════════════════════════════════════════════════
+//  TRUEFORM — script.js
+// ══════════════════════════════════════════════════════════════
 
+
+// ─── Element refs ──────────────────────────────────────────────
 const themeToggle = document.getElementById("themeToggle");
-
+const themeIcon = document.getElementById("themeIcon");
 const audioInput = document.getElementById("audioInput");
-
 const dropArea = document.getElementById("dropArea");
-
 const fileName = document.getElementById("fileName");
-
 const analyzeBtn = document.getElementById("analyzeBtn");
-
 const loading = document.getElementById("loading");
-
 const resultBox = document.getElementById("resultBox");
-
 const resultText = document.getElementById("resultText");
-
+const resultSubtext = document.getElementById("resultSubtext");
+const resultIcon = document.getElementById("resultIcon");
 const audioPlayer = document.getElementById("audioPlayer");
+const navbar = document.getElementById("navbar");
+const resetBtn = document.getElementById("resetBtn");
 
-let wavesurfer;
-
-// Track the current file to send
-let currentFile = null;
+let wavesurfer = null;
+let recordedBlob = null;
 
 
-// ================= DARK MODE =================
+// ─── Navbar scroll effect ───────────────────────────────────────
+window.addEventListener("scroll", () => {
+  navbar.classList.toggle("scrolled", window.scrollY > 60);
+});
 
-// Check local storage for saved theme
-if (localStorage.getItem("theme") === "dark") {
-  document.documentElement.classList.add("dark");
+
+// ─── Theme toggle ───────────────────────────────────────────────
+if (localStorage.getItem("theme") === "light") {
+  document.body.classList.add("light");
+  themeIcon.textContent = "●";
 }
 
-// Toggle theme
 themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+  const isLight = document.body.classList.contains("light");
+  localStorage.setItem("theme", isLight ? "light" : "dark");
+  themeIcon.textContent = isLight ? "●" : "○";
+});
 
-  document.documentElement.classList.toggle("dark");
 
-  // Save theme preference
-  if (document.documentElement.classList.contains("dark")) {
-    localStorage.setItem("theme", "dark");
-  } else {
-    localStorage.setItem("theme", "light");
+// ─── Hero Canvas — oscilloscope animation ───────────────────────
+(function initCanvas() {
+  const canvas = document.getElementById("heroCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
-});
+  resize();
+  window.addEventListener("resize", resize);
 
+  let t = 0;
 
-// ================= FILE INPUT =================
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Click on drop area
-dropArea.addEventListener("click", () => {
-  audioInput.click();
-});
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const w = canvas.width;
 
-// File selection
-audioInput.addEventListener("change", () => {
+    // Draw 3 overlapping sine wave lines — like an oscilloscope
+    const waves = [
+      { amp: 60, freq: 0.012, speed: 0.4, opacity: 0.6, offset: 0 },
+      { amp: 35, freq: 0.020, speed: 0.7, opacity: 0.45, offset: 40 },
+      { amp: 90, freq: 0.007, speed: 0.25, opacity: 0.35, offset: -20 },
+    ];
 
-  const file = audioInput.files[0];
+    waves.forEach(wave => {
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(201, 169, 110, ${wave.opacity})`;
+      ctx.lineWidth = 1.5;
 
-  if (file) {
+      for (let x = 0; x <= w; x += 2) {
+        const y = cy + wave.offset
+          + wave.amp * Math.sin(x * wave.freq + t * wave.speed)
+          + (wave.amp * 0.3) * Math.sin(x * wave.freq * 2.3 + t * wave.speed * 1.5);
 
-    // Store reference for upload
-    currentFile = file;
-
-    fileName.textContent = `Selected File: ${file.name}`;
-
-    // Create local audio URL
-    const audioURL = URL.createObjectURL(file);
-
-    // Show player
-    audioPlayer.src = audioURL;
-
-    audioPlayer.classList.remove("hidden");
-
-    if (wavesurfer) {
-      wavesurfer.destroy();
-    }
-
-    wavesurfer = WaveSurfer.create({
-      container: '#waveform',
-      waveColor: '#60a5fa',
-      progressColor: '#2563eb',
-      height: 100,
-      responsive: true
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
     });
 
-    wavesurfer.load(audioURL);
-
-    // Hide previous results when a new file is selected
-    resultBox.classList.add("hidden");
+    t += 0.04;
+    requestAnimationFrame(draw);
   }
-});
+
+  draw();
+})();
 
 
-// ================= DRAG AND DROP =================
+// ─── Drop Zone ──────────────────────────────────────────────────
+dropArea.addEventListener("click", () => audioInput.click());
 
-// Drag over
-dropArea.addEventListener("dragover", (e) => {
+dropArea.addEventListener("dragover", e => {
   e.preventDefault();
-
-  dropArea.classList.add("border-blue-600");
+  dropArea.classList.add("dragging");
 });
 
-// Drag leave
 dropArea.addEventListener("dragleave", () => {
-
-  dropArea.classList.remove("border-blue-600");
+  dropArea.classList.remove("dragging");
 });
 
-// Drop file
-dropArea.addEventListener("drop", (e) => {
-
+dropArea.addEventListener("drop", e => {
   e.preventDefault();
-
-  dropArea.classList.remove("border-blue-600");
-
+  dropArea.classList.remove("dragging");
   const file = e.dataTransfer.files[0];
-
   if (file) {
-
     audioInput.files = e.dataTransfer.files;
-
-    currentFile = file;
-
-    fileName.textContent = `Selected File: ${file.name}`;
-
-    // Show audio preview
-    const audioURL = URL.createObjectURL(file);
-    audioPlayer.src = audioURL;
-    audioPlayer.classList.remove("hidden");
-
-    // Hide previous results
-    resultBox.classList.add("hidden");
+    handleFileSelected(file);
   }
 });
 
+audioInput.addEventListener("change", () => {
+  const file = audioInput.files[0];
+  if (file) handleFileSelected(file);
+});
 
-// ================= ANALYZE BUTTON =================
+function handleFileSelected(file) {
+  fileName.textContent = file.name;
 
+  const url = URL.createObjectURL(file);
+  audioPlayer.src = url;
+  audioPlayer.classList.remove("hidden-el");
+
+  if (wavesurfer) { wavesurfer.destroy(); wavesurfer = null; }
+
+  wavesurfer = WaveSurfer.create({
+    container: "#waveform",
+    waveColor: "rgba(201,169,110,0.4)",
+    progressColor: "#c9a96e",
+    height: 80,
+    barWidth: 2,
+    barGap: 1,
+    barRadius: 1,
+    responsive: true,
+    cursorColor: "transparent",
+    backend: "WebAudio",
+  });
+
+  wavesurfer.load(url);
+}
+
+
+// ─── Analyze Button ─────────────────────────────────────────────
 analyzeBtn.addEventListener("click", async () => {
 
-  // Check if we have a file to analyze
-  if (!currentFile) {
+  const file = audioInput.files[0];
+  const isRecorded = fileName.textContent === "Recorded Audio Ready";
+
+  if (!file && !isRecorded) {
     alert("Please upload an audio file first.");
     return;
   }
 
+  const formData = new FormData();
+  if (isRecorded && recordedBlob) {
+    formData.append("file", recordedBlob, "recorded.wav");
+  } else {
+    formData.append("file", file);
+  }
+
   // Show loader
-  loading.classList.remove("hidden");
-
-  // Hide previous result
-  resultBox.classList.add("hidden");
-
-  // Disable button during processing
-  analyzeBtn.disabled = true;
-  analyzeBtn.textContent = "Analyzing...";
+  loading.classList.remove("hidden-el");
+  resultBox.classList.add("hidden-el");
 
   try {
-    // Build form data
-    const formData = new FormData();
-    formData.append("file", currentFile);
-
-    // Send to Flask backend
     const response = await fetch("/predict", {
       method: "POST",
       body: formData,
@@ -169,43 +179,75 @@ analyzeBtn.addEventListener("click", async () => {
     const data = await response.json();
 
     // Hide loader
-    loading.classList.add("hidden");
+    loading.classList.add("hidden-el");
 
-    if (!response.ok) {
-      // Server returned an error
-      alert(data.error || "Something went wrong. Please try again.");
+    if (data.error) {
+      alert("Error: " + data.error);
       return;
     }
 
-    // Show result
-    resultBox.classList.remove("hidden");
+    showResult(data);
 
-    resultText.textContent = data.prediction;
-
-    document.getElementById("confidenceText").textContent =
-      `Confidence Score: ${data.confidence}%`;
-
-    // Styling based on result
-    if (data.prediction === "Real") {
-
-      resultBox.className =
-        "mt-10 p-6 rounded-xl text-center bg-green-100 text-green-700";
-
-    } else {
-
-      resultBox.className =
-        "mt-10 p-6 rounded-xl text-center bg-red-100 text-red-700";
-    }
-
-  } catch (error) {
-    // Network error or server down
-    loading.classList.add("hidden");
-    alert("Could not connect to the server. Please make sure the backend is running.");
-    console.error("Prediction error:", error);
-
-  } finally {
-    // Re-enable button
-    analyzeBtn.disabled = false;
-    analyzeBtn.textContent = "Analyze Audio";
+  } catch (err) {
+    loading.classList.add("hidden-el");
+    alert("Could not connect to server. Please try again.");
   }
+});
+
+function showResult(data) {
+  resultBox.classList.remove("hidden-el", "is-real", "is-fake");
+
+  if (data.label === "Real") {
+    resultBox.classList.add("is-real");
+
+    resultIcon.innerHTML = `
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+           stroke="#4ade80" stroke-width="1.5">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>`;
+
+    resultText.textContent = "Human Voice";
+    resultSubtext.textContent = "This audio was classified as a genuine human recording.";
+
+  } else {
+    resultBox.classList.add("is-fake");
+
+    resultIcon.innerHTML = `
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+           stroke="#f87171" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9"  y1="9" x2="15" y2="15"/>
+      </svg>`;
+
+    resultText.textContent = "AI Generated";
+    resultSubtext.textContent = "Deepfake patterns detected in the audio signal.";
+  }
+
+  // Smooth scroll to result
+  resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+
+// ─── Reset Button ───────────────────────────────────────────────
+resetBtn.addEventListener("click", () => {
+  // Hide result
+  resultBox.classList.add("hidden-el");
+  resultBox.classList.remove("is-real", "is-fake");
+
+  // Clear audio player
+  audioPlayer.src = "";
+  audioPlayer.classList.add("hidden-el");
+
+  // Clear waveform
+  if (wavesurfer) { wavesurfer.destroy(); wavesurfer = null; }
+
+  // Clear file input
+  audioInput.value = "";
+  fileName.textContent = "";
+  recordedBlob = null;
+
+  // Scroll back to drop zone
+  dropArea.scrollIntoView({ behavior: "smooth", block: "center" });
 });

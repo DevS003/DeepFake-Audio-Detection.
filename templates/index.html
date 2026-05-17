@@ -1,205 +1,240 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrueForm — Deepfake Audio Detection</title>
 
-  <title>Deepfake Audio Detector</title>
-  <meta name="description"
-    content="Upload an audio file and detect whether it is human speech or AI-generated deepfake audio using machine learning.">
+  <!-- Fonts: Bebas Neue for display, Crimson Pro for italic accent, DM Sans for body -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital@1&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- External CSS (Flask static) -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-  <!-- Tailwind Dark Mode Config -->
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 
-<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white transition-all duration-300">
+<body>
 
-  <!-- ================= NAVBAR ================= -->
-  <nav class="fixed top-0 left-0 w-full bg-white dark:bg-gray-800 shadow-md z-50">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+  <!-- ═══════════════════════════════════════════════
+       NAVBAR — minimal, barely there
+  ════════════════════════════════════════════════ -->
+  <nav id="navbar">
+    <div class="nav-logo">TrueForm</div>
 
-      <!-- Logo -->
-      <h1 class="text-2xl font-bold text-blue-600">
-        TrueForm
-      </h1>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#detect">Detect</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
 
-      <!-- Nav Links -->
-      <ul class="hidden md:flex space-x-8 font-medium">
-        <li><a href="#home" class="hover:text-blue-500">Home</a></li>
-        <li><a href="#detect" class="hover:text-blue-500">Detect</a></li>
-        <li><a href="#about" class="hover:text-blue-500">About</a></li>
-        <li><a href="#contact" class="hover:text-blue-500">Contact</a></li>
-      </ul>
-
-      <!-- Theme Toggle -->
-      <button id="themeToggle" class="bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-lg">
-        🌙
-      </button>
-    </div>
+    <button id="themeToggle" aria-label="Toggle theme">
+      <span id="themeIcon">○</span>
+    </button>
   </nav>
 
-  <!-- ================= HERO SECTION ================= -->
-  <section id="home" class="min-h-screen flex flex-col justify-center items-center text-center px-6">
 
-    <h2 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-      Deepfake Audio Detection
-    </h2>
+  <!-- ═══════════════════════════════════════════════
+       HERO — full screen, cinematic
+  ════════════════════════════════════════════════ -->
+  <section id="home" class="hero">
 
-    <p class="max-w-2xl text-lg text-gray-600 dark:text-gray-300 mb-8">
-      Upload an audio file and let the machine learning
-      model determine whether the voice is human or AI generated.
-    </p>
+    <!-- Canvas oscilloscope background -->
+    <canvas id="heroCanvas"></canvas>
 
-    <a href="#detect" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl transition">
-      Start Detection
-    </a>
+    <!-- Overlay grain texture -->
+    <div class="grain"></div>
+
+    <!-- Hero content -->
+    <div class="hero-content">
+      <p class="hero-eyebrow">Audio Intelligence</p>
+
+      <h1 class="hero-title">
+        <span class="hero-title-top">IS THAT</span>
+        <span class="hero-title-accent">voice</span>
+        <span class="hero-title-bottom">REAL?</span>
+      </h1>
+
+      <p class="hero-sub">
+        Upload an audio file. The model decides.
+      </p>
+
+      <a href="#detect" class="hero-cta">
+        <span>Begin Analysis</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- Corner labels like pixila.net -->
+    <div class="hero-corner hero-corner-bl">ASVspoof 2019</div>
+    <div class="hero-corner hero-corner-br">CNN · 89% Accuracy</div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-hint">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </div>
+
   </section>
 
-  <!-- ================= DETECTION SECTION ================= -->
-  <section id="detect" class="py-24 px-6 bg-white dark:bg-gray-800">
 
-    <div class="max-w-4xl mx-auto">
+  <!-- ═══════════════════════════════════════════════
+       STATS BAR
+  ════════════════════════════════════════════════ -->
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num">120K+</span>
+      <span class="stat-label">Training Samples</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num">89%</span>
+      <span class="stat-label">Accuracy</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num">CNN</span>
+      <span class="stat-label">Architecture</span>
+    </div>
+  </div>
 
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold mb-4">
-          Upload Audio File
-        </h2>
 
-        <p class="text-gray-600 dark:text-gray-300">
-          Supported Formats: .flac, .wav, .mp3, .ogg
+  <!-- ═══════════════════════════════════════════════
+       DETECT SECTION
+  ════════════════════════════════════════════════ -->
+  <section id="detect" class="detect-section">
+
+    <div class="detect-header">
+
+      <h2 class="section-title">Upload Audio</h2>
+      <p class="section-sub">Supported formats: .flac · .wav · .mp3 · .ogg</p>
+    </div>
+
+    <!-- Drop zone -->
+    <div id="dropArea" class="drop-zone">
+      <input type="file" id="audioInput" accept=".flac,.wav,.mp3,.ogg" class="hidden-input">
+
+      <div class="drop-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+      </div>
+      <p class="drop-main">Drop file here or <span class="drop-link">browse</span></p>
+      <p class="drop-hint">Max file size: 25MB</p>
+    </div>
+
+    <!-- File name display -->
+    <p id="fileName" class="file-name"></p>
+
+    <!-- Audio player -->
+    <audio id="audioPlayer" controls class="audio-player hidden-el"></audio>
+
+    <!-- Waveform -->
+    <div id="waveform" class="waveform-container"></div>
+
+    <!-- Analyze button -->
+    <div class="analyze-wrap">
+      <button id="analyzeBtn" class="analyze-btn">
+        <span>Analyze Audio</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Loader -->
+    <div id="loading" class="loader-wrap hidden-el">
+      <div class="loader-ring"></div>
+      <p class="loader-text">Analyzing audio signal…</p>
+    </div>
+
+    <!-- Result -->
+    <div id="resultBox" class="result-box hidden-el">
+      <div id="resultIconWrap" class="result-icon-wrap">
+        <div id="resultIcon"></div>
+      </div>
+      <h3 id="resultText" class="result-label"></h3>
+      <p id="resultSubtext" class="result-sub"></p>
+      <button id="resetBtn" class="reset-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polyline points="1 4 1 10 7 10" />
+          <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+        </svg>
+        <span>Reset</span>
+      </button>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════
+       ABOUT
+  ════════════════════════════════════════════════ -->
+  <section id="about" class="about-section">
+
+    <div class="about-grid">
+      <div class="about-left">
+        <p class="section-eyebrow">About</p>
+        <h2 class="section-title">How It Works</h2>
+      </div>
+      <div class="about-right">
+        <p class="about-body">
+          TrueForm analyzes audio using a Convolutional Neural Network trained on the
+          ASVspoof 2019 dataset — 120,000+ samples of real and synthesized speech.
+          The model converts each audio file into a Mel spectrogram, then classifies
+          the acoustic patterns to determine whether a voice is human or AI-generated.
         </p>
-      </div>
-
-      <!-- Upload Card -->
-      <div class="bg-gray-100 dark:bg-gray-900 p-10 rounded-2xl shadow-lg">
-
-        <!-- Drag Drop Area -->
-        <div id="dropArea"
-          class="border-2 border-dashed border-blue-400 rounded-xl p-12 text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition">
-
-          <input type="file" id="audioInput" accept=".flac,.wav,.mp3,.ogg,.webm,.m4a" class="hidden">
-
-          <p class="text-xl font-medium mb-3">
-            Drag & Drop your audio file here
-          </p>
-
-          <p class="text-gray-500 mb-5">
-            or click to browse files
-          </p>
-
-          <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-            Select File
-          </button>
+        <div class="about-pills">
+          <span class="pill">Mel Spectrogram</span>
+          <span class="pill">CNN Model</span>
+          <span class="pill">PyTorch</span>
+          <span class="pill">Flask API</span>
+          <span class="pill">ASVspoof 2019</span>
         </div>
-
-        <!-- File Name -->
-        <div id="fileName" class="mt-6 text-center text-green-600 font-medium">
-        </div>
-
-        <!-- Audio Preview -->
-        <div class="mt-6">
-          <audio id="audioPlayer" controls class="w-full hidden">
-          </audio>
-        </div>
-
-        <div id="waveform" class="mt-8">
-        </div>
-
-
-
-        <!-- Analyze Button -->
-        <div class="text-center mt-8">
-          <button id="analyzeBtn"
-            class="bg-black dark:bg-blue-600 text-white px-8 py-3 rounded-xl hover:opacity-90 transition">
-            Analyze Audio
-          </button>
-        </div>
-
-        <!-- Loading -->
-        <div id="loading" class="hidden mt-8 flex justify-center">
-          <div class="loader"></div>
-        </div>
-
-        <!-- Result -->
-        <div id="resultBox" class="hidden mt-10 p-6 rounded-xl text-center">
-          <h3 class="text-2xl font-bold mb-2">
-            Prediction Result
-          </h3>
-          <p id="confidenceText" class="mt-3 text-lg">
-          </p>
-
-          <p id="resultText" class="text-xl font-semibold">
-          </p>
-        </div>
-
       </div>
     </div>
+
   </section>
 
-  <!-- ================= ABOUT SECTION ================= -->
-  <section id="about" class="py-24 px-6">
 
-    <div class="max-w-5xl mx-auto text-center">
+  <!-- ═══════════════════════════════════════════════
+       FOOTER / CONTACT
+  ════════════════════════════════════════════════ -->
+  <footer id="contact" class="footer">
 
-      <h2 class="text-4xl font-bold mb-8">
-        About The Project
-      </h2>
-
-      <p class="text-lg leading-8 text-gray-600 dark:text-gray-300">
-        This project uses machine learning techniques to identify
-        whether an uploaded audio sample is generated by AI or spoken
-        naturally by a human. The model analyzes patterns, frequency
-        distributions, and acoustic features extracted from audio files.
-      </p>
-
+    <div class="footer-brand">
+      <span class="footer-logo">TrueForm</span>
+      <p class="footer-tagline">Detecting the inauthentic.</p>
+      <div class="footer-accent-line"></div>
     </div>
-  </section>
 
-  <!-- ================= CONTACT SECTION ================= -->
-  <footer id="contact" class="bg-gray-200 dark:bg-gray-800 py-10">
-
-    <div class="max-w-6xl mx-auto px-6 text-center">
-
-      <h2 class="text-3xl font-bold mb-4">
-        Contact
-      </h2>
-
-      <p class="mb-2">
-        Email: yourmail@example.com
-      </p>
-
-      <p class="mb-6">
-        Chitkara University, Punjab
-      </p>
-
-      <div class="flex justify-center space-x-6">
-        <a href="#" class="hover:text-blue-500">LinkedIn</a>
-        <a href="#" class="hover:text-blue-500">GitHub</a>
-        <a href="#" class="hover:text-blue-500">Portfolio</a>
-      </div>
-
-      <p class="mt-8 text-sm text-gray-500">
-        © 2026 Deepfake Audio Detection Project
-      </p>
-
+    <div class="footer-info">
+      <a href="mailto:dev8523.beaift24@chitkara.edu.in" class="footer-link">dev8523.beaift24@chitkara.edu.in</a>
+      <span class="footer-dot">·</span>
+      <a href="mailto:arun8517.beaift24@chitkara.edu.in" class="footer-link">arun8517.beaift24@chitkara.edu.in</a>
+      <span class="footer-dot">·</span>
+      <span class="footer-val">Chitkara University, Punjab</span>
     </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Deepfake Audio Detection Project</p>
+      <p>Built with PyTorch · Flask</p>
+    </div>
+
   </footer>
 
-  <!-- External JS -->
-  <script src="https://unpkg.com/wavesurfer.js"></script>
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
 
+  <!-- WaveSurfer -->
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+  <script src="/static/script.js"></script>
 </body>
 
 </html>
