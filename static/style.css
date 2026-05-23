@@ -29,6 +29,8 @@
   --font-accent: 'Crimson Pro', serif;
   --font-body: 'DM Sans', sans-serif;
   --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Navbar scrolled background — theme-aware */
+  --nav-scrolled-bg: rgba(8, 8, 8, 0.92);
 }
 
 /* Light theme overrides */
@@ -39,6 +41,7 @@ body.light {
   --border: rgba(0, 0, 0, 0.08);
   --text: #1a1814;
   --muted: rgba(26, 24, 20, 0.45);
+  --nav-scrolled-bg: rgba(244, 241, 235, 0.95);
 }
 
 html {
@@ -107,7 +110,7 @@ button {
 }
 
 #navbar.scrolled {
-  background: rgba(8, 8, 8, 0.92);
+  background: var(--nav-scrolled-bg);
   backdrop-filter: blur(12px);
   padding: 16px 48px;
   border-bottom: 1px solid var(--border);
@@ -669,81 +672,195 @@ button {
 }
 
 
-/* ─── Footer ────────────────────────────────────────────────── */
-.footer {
-  border-top: 1px solid var(--border);
-  padding: 56px 48px 40px;
+/* ─── Contact / Footer ──────────────────────────────────────── */
+.contact-footer {
   background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+/* Section header */
+.contact-header {
   text-align: center;
-}
-
-.footer-brand {
-  margin-bottom: 32px;
-}
-
-.footer-logo {
-  font-family: var(--font-display);
-  font-size: 32px;
-  letter-spacing: 4px;
-  color: var(--muted);
-  display: block;
-  margin-bottom: 4px;
-}
-
-.footer-tagline {
-  font-size: 12px;
-  color: var(--accent);
-  font-family: var(--font-accent);
-  font-style: italic;
-  margin-bottom: 20px;
-}
-
-.footer-accent-line {
-  width: 28px;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.5;
+  padding: 80px 48px 56px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
-.footer-info {
+.contact-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 80px);
+  letter-spacing: 4px;
+  color: var(--text);
+  line-height: 0.95;
+  margin-bottom: 16px;
+}
+
+.contact-sub {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+}
+
+/* Cards row */
+.contact-cards {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 48px 80px;
+  gap: 0;
+}
+
+.contact-card {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 40px 36px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.contact-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+
+/* Avatar initial circle */
+.contact-card-avatar {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 6px 0;
-  margin-bottom: 32px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--border);
-}
-
-.footer-link {
-  font-size: 13px;
-  color: var(--text);
-  transition: color var(--transition);
-}
-
-.footer-link:hover {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 1px;
   color: var(--accent);
 }
 
-.footer-dot {
-  font-size: 13px;
-  color: var(--muted);
-  margin: 0 14px;
+.contact-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.footer-val {
-  font-size: 13px;
+.contact-card-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 3px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.contact-card-role {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.contact-card-email {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  transition: color var(--transition);
+  word-break: break-all;
+}
+
+.contact-card-email:hover {
   color: var(--text);
 }
 
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
+/* LinkedIn button */
+.contact-linkedin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
   color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  align-self: flex-start;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+
+.contact-linkedin-btn:hover {
+  border-color: #0a66c2;
+  color: #0a66c2;
+  background: rgba(10, 102, 194, 0.08);
+}
+
+/* Vertical divider between cards */
+.contact-cards-divider {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+/* Bottom bar */
+.contact-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 24px 48px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.contact-university {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.contact-copy {
+  font-size: 11px;
   letter-spacing: 1px;
+  color: var(--muted);
+}
+
+/* Centered brand in bottom bar */
+.contact-bottom-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.contact-bottom-logo {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.contact-bottom-tagline {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.5px;
 }
 
 
@@ -810,21 +927,33 @@ button {
     padding: 48px 24px 32px;
   }
 
-  .footer-logo {
-    font-size: 48px;
+  .contact-brand {
+    padding: 48px 24px 40px;
   }
 
-  .footer-info {
+  .contact-header {
+    padding: 56px 24px 40px;
+  }
+
+  .contact-cards {
     flex-direction: column;
-    gap: 8px;
+    padding: 0 24px 56px;
   }
 
-  .footer-dot {
-    display: none;
+  .contact-cards-divider {
+    width: 100%;
+    height: 1px;
+    align-self: auto;
   }
 
-  .footer-bottom {
+  .contact-card {
+    padding: 32px 24px;
+  }
+
+  .contact-bottom {
     flex-direction: column;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 20px 24px;
   }
 }
