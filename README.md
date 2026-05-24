@@ -35,7 +35,7 @@ This project addresses the growing threat of synthetic audio deepfakes by buildi
 ## Setup
 
 ### Requirements
-- Python 3.8+
+- Python 3.11
 - Dependencies listed in `requirements.txt`
 
 ### Installation
@@ -146,8 +146,7 @@ Or manually deploy via the Render dashboard using the `render.yaml` configuratio
 
 **Deployment Requirements:**
 - Model file (`models/cnn_model.pth`) committed to repository
-- Port exposed: 5000
-- Python 3.8+ buildpack
+- Python 3.11
 
 ## Configuration
 
@@ -180,10 +179,9 @@ On limited systems, close other applications or increase swap space. The model r
 ## Future Improvements
 
 - GPU acceleration for faster inference
-- Batch processing capabilities
 - Model retraining pipeline
 - Additional audio preprocessing options
-- Confidence calibration for production thresholds
+
 
 
 ## Disclaimer
